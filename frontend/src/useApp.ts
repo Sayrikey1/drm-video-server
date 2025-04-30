@@ -2,58 +2,85 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { VideoInfo } from "./VideoPlayer/useVideoPlayer";
 
-// const SAMPLE_S3_FILE_KEY = "file1/result/hls/sample_video_1080p.m3u8";
-const SAMPLE_S3_FILE_KEY = "59641f67-b958-465d-aa08-95ec6412338c";
-const HLS_MIME_TYPE = "application/x-mpegURL"; // mime-type for HLS protocol
-
-interface AbsContentResult {
-  accessQueryString?: string;
-  fileUrl: string;
-  cookies: {
-    [key: string]: {
-      value: string;
-      options?: object;
-    };
+interface VideoResponse {
+  id: number;
+  video_key: string;
+  video_urls: {
+    hls: string;
+    dash: string;
+    thumbnail: string;
   };
+  source_language: string;
+  subtitle_count: number;
+  subtitles: {
+    [language: string]: string;
+  };
+  created_at: string;
+  updated_at: string;
 }
 
-/**
- * Continue :
- * 1. Finish frontend function call to backend
- * 2. Init new service to grant access to Cloudfront + Signed cookies
- * 3. Create Cloudfront distribution
- * 4. Finish second service to grant access to Cloudfront
- * 5. Setup CORS on backend
- * 6. Talk about deployments
- */
-const useApp = () => {
-  const [videoContent, setVideoContent] = useState<VideoInfo | undefined>(
-    undefined
-  );
+const useApp = (videoKey: string = "string--COOKIE-TEST-001") => {
+  const [videoContent, setVideoContent] = useState<VideoInfo | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleGetFileInfo = async () => {
-    const s3FileKey = encodeURIComponent(SAMPLE_S3_FILE_KEY); // path param
-    const mimeType = HLS_MIME_TYPE;
+  const extractUuidFromHlsUrl = (hlsUrl: string): string => {
+    const matches = hlsUrl.match(/hls_([^/]+)\/playlist\.m3u8/);
+    return matches ? matches[1] : "";
+  };
 
-    const result = await axios.get(
-      `https://api.streaming.mabi-vids.com/abs/${s3FileKey}/access`,
-      {
-        withCredentials: true, // to set cookies from backend to frontend
+  const handleGetVideoInfo = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const result = await axios.get(
+        `https://streaming.mabi-vids.com/get-video/${encodeURIComponent(videoKey)}`
+      );
+      
+      const data = result.data as VideoResponse;
+      const hlsUrl = data.video_urls.hls;
+      const uuid = extractUuidFromHlsUrl(hlsUrl);
+
+      const signer = await axios.get(
+        `https://api.streaming.mabi-vids.com/abs/${uuid}/access`,
+        {
+          withCredentials: true, // to set cookies from backend to frontend
+        }
+      );
+
+      if (signer.status !== 200) {
+        throw new Error("Failed to sign the video URL");
       }
-    );
-    const data = result.data as AbsContentResult;
-    setVideoContent({
-      videoSrc: data.fileUrl, // Cloudfront playlist file url (.m3u8)
-      videoMimeType: mimeType,
-    });
+      
+      // Set up video info with the data from API
+      setVideoContent({
+        videoSrc: hlsUrl,
+        videoMimeType: "application/x-mpegURL",
+        subtitles: data.subtitles,
+        uuid: uuid,
+        sourceLanguage: data.source_language,
+        thumbnail: data.video_urls.thumbnail
+      });
+    } catch (err) {
+      console.error("Failed to fetch video info:", err);
+      setError("Failed to load video information. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    handleGetFileInfo();
-  }, []);
+    if (videoKey) {
+      handleGetVideoInfo();
+    }
+  }, [videoKey]);
 
   return {
     videoContent,
+    loading,
+    error,
+    refreshVideo: handleGetVideoInfo
   };
 };
 
