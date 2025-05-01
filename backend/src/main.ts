@@ -13,10 +13,8 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'https://drm-video-server.vercel.app',
-      'https://drm-video-server.vercel.app/',
       'drm-video-server.vercel.app',
       'https://drm-hls-site-test.netlify.app',
-      'https://drm-hls-site-test.netlify.app/',
       'drm-hls-site-test.netlify.app'
     ],
     credentials: true,
