@@ -12,7 +12,9 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'http://localhost:3000',
-      'https://test-frontend.mabi-vids.com'
+      'https://test-frontend.mabi-vids.com',
+      'https://drm-video-server.vercel.app',
+      'https://drm-hls-site-test.netlify.app'
     ],
     credentials: true,
   });
