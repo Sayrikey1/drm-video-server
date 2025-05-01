@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PRIVATE_KEY_CONTENT } from './abs-generation.constants';
 import { getSignedCookies } from '@aws-sdk/cloudfront-signer';
+import * as dotenv from 'dotenv';
 
-const cloudfrontDistributionDomain = 'hls-video-server.mabi-vids.com';
+dotenv.config();
 
-const KEYPAIR_ID ='K1MM4JNDQRB5TY';
+const cloudfrontDistributionDomain = process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN;
+
+const KEYPAIR_ID = process.env.CLOUDFRONT_KEYPAIR_ID;
 
 export interface CookiesData {
   [key: string]: {
