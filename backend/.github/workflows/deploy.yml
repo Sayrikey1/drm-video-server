@@ -1,0 +1,89 @@
+# .github/workflows/deploy.yml
+name: CI/CD → EC2 Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2) Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # 3) Install dependencies, run tests, and build
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build application
+        run: npm run build
+
+      # 4) Package build artifacts
+      - name: Archive build artifacts
+        run: |
+          mkdir deploy_package
+          cp -r dist package.json ecosystem.config.js .env deploy_package/
+          cd deploy_package
+          zip -r ../deploy.zip .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: deploy-package
+          path: deploy.zip
+
+      # 5) Download artifact for deployment
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: deploy-package
+          path: .
+
+      # 6) Setup SSH key for EC2
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      # 7) Deploy to EC2 and restart PM2
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key_path: ~/.ssh/id_rsa
+          envs: |
+            APP_DIR=${{ secrets.APP_DIR }}
+            PM2_APP_NAME=${{ secrets.PM2_APP_NAME }}
+          script: |
+            set -e
+
+            # Prepare application directory
+            mkdir -p "$APP_DIR"
+            rm -rf "$APP_DIR"/*
+
+            # Unzip new build
+            unzip -o deploy.zip -d "$APP_DIR"
+
+            cd "$APP_DIR"
+
+            # Install production dependencies
+            npm ci --production
+
+            # Start or restart via PM2
+            pm2 startOrRestart ecosystem.config.js --only "$PM2_APP_NAME"
+            pm2 save
