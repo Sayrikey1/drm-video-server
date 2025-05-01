@@ -45,19 +45,19 @@ const useApp = (videoKey: string = "string--COOKIE-TEST-001") => {
       const hlsUrl = data.video_urls.hls;
       const uuid = extractUuidFromHlsUrl(hlsUrl);
 
-      const signer = await axios.get(
-        `https://api.streaming.mabi-vids.com/abs/${uuid}/access`,
-        {
-          withCredentials: true, // to set cookies from backend to frontend
-        }
-      );
-
       // const signer = await axios.get(
-      //   `https://api-stream.mabi-vids.com/abs/${uuid}/access`,
+      //   `https://api.streaming.mabi-vids.com/abs/${uuid}/access`,
       //   {
       //     withCredentials: true, // to set cookies from backend to frontend
       //   }
       // );
+
+      const signer = await axios.get(
+        `https://api-stream.mabi-vids.com/abs/${uuid}/access`,
+        {
+          withCredentials: true, // to set cookies from backend to frontend
+        }
+      );
 
       if (signer.status !== 200) {
         throw new Error("Failed to sign the video URL");
