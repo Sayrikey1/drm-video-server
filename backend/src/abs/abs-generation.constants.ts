@@ -4,6 +4,12 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+// abs-generation.constants.ts
+import { readFileSync } from 'fs';
+import * as path from 'path';
+
+
+
 export const outputHLS1080p: MediaConvertOutput = {
   ContainerSettings: {
     Container: 'M3U8',
@@ -154,4 +160,12 @@ export const DEFAULT_HLS_SEGMENT_LENGTH_IN_SEC = 10;
 
 export const HLS_CONTENT_PREFIX = 'hls';
 
-export const PRIVATE_KEY_CONTENT = process.env.ABS_PRIVATE_KEY_CONTENT;
+// export const PRIVATE_KEY_CONTENT = process.env.ABS_PRIVATE_KEY_CONTENT;
+
+const keyPath = process.env.CLOUDFRONT_PRIVATE_KEY_PATH;
+if (!keyPath) throw new Error('CLOUDFRONT_PRIVATE_KEY_PATH not set');
+
+export const PRIVATE_KEY_CONTENT = readFileSync(
+  path.resolve(keyPath),
+  'utf-8'
+);

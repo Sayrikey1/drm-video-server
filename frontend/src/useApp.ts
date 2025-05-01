@@ -42,8 +42,15 @@ const useApp = (videoKey: string = "string--COOKIE-TEST-001") => {
       const hlsUrl = data.video_urls.hls;
       const uuid = extractUuidFromHlsUrl(hlsUrl);
 
+      // const signer = await axios.get(
+      //   `https://api.streaming.mabi-vids.com/abs/${uuid}/access`,
+      //   {
+      //     withCredentials: true, // to set cookies from backend to frontend
+      //   }
+      // );
+
       const signer = await axios.get(
-        `https://api.streaming.mabi-vids.com/abs/${uuid}/access`,
+        `http://localhost:3005/abs/${uuid}/access`,
         {
           withCredentials: true, // to set cookies from backend to frontend
         }
