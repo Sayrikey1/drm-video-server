@@ -83,7 +83,7 @@ const useVideoPlayer = ({ videoSrc, videoMimeType, subtitles, uuid, sourceLangua
     if (!subtitles) return;
     
     // Clear existing tracks
-    const tracks = player.remoteTextTracks();
+    const tracks = (player as any).textTracks();
     for (let i = tracks.length - 1; i >= 0; i--) {
       player.removeRemoteTextTrack(tracks[i]);
     }

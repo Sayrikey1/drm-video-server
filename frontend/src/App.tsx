@@ -6,7 +6,7 @@ import VideoPlayerComponent from "./VideoPlayer/VideoPlayer.component";
 function App() {
   const [videoKey, setVideoKey] = useState<string>("string--COOKIE-TEST-001");
   const [inputKey, setInputKey] = useState<string>("");
-  const { videoContent, loading, error, refreshVideo } = useApp(videoKey);
+  const { videoContent, loading, error } = useApp(videoKey);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
