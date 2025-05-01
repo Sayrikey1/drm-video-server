@@ -35,10 +35,7 @@ const useApp = (videoKey: string = "string--COOKIE-TEST-001") => {
     
     try {
       const result = await axios.get(
-        `https://streaming.mabi-vids.com/get-video/${encodeURIComponent(videoKey)}`,
-        {
-          withCredentials: true, // to set cookies from backend to frontend
-        }
+        `https://streaming.mabi-vids.com/get-video/${encodeURIComponent(videoKey)}`
       );
       
       const data = result.data as VideoResponse;
