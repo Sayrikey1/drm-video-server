@@ -9,6 +9,13 @@ const cloudfrontDistributionDomain = process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN;
 
 const KEYPAIR_ID = process.env.CLOUDFRONT_KEYPAIR_ID;
 
+if (!KEYPAIR_ID) {
+  throw new Error('CLOUDFRONT_KEYPAIR_ID is not defined');
+}
+if (!cloudfrontDistributionDomain) {
+  throw new Error('CLOUDFRONT_DISTRIBUTION_DOMAIN is not defined');
+}
+
 export interface CookiesData {
   [key: string]: {
     value: string;
