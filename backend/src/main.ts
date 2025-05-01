@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3005;
 const resolveAppMiddlewares = (app: INestApplication) => {
   app.use(cookieParser());
   app.enableCors({
-    origin: ['http://localhost:3000'], // put your frontend endpoints here
+    origin: ['http://localhost:3000', 'https://drm-video-server.vercel.app'], // put your frontend endpoints here
     credentials: true, // allows frontend to receive cookies from backend
   });
 };
