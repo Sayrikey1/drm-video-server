@@ -14,10 +14,7 @@ async function bootstrap() {
       'http://localhost:3000',
       'https://test-frontend.mabi-vids.com',
       'https://drm-video-server.vercel.app',
-      'https://drm-hls-site-test.netlify.app',
-      'test-frontend.mabi-vids.com',
-      'drm-video-server.vercel.app',
-      'drm-hls-site-test.netlify.app'
+      'https://drm-hls-site-test.netlify.app'
     ],
     credentials: true,
   });
